@@ -147,6 +147,12 @@ function formatDate(date) {
   return dateUTC.toLocaleString('en-US');
 }
 
+function getClosestDayOfWeek(date, dayOfWeek) {
+  const day = date.getDay();
+  if (day === dayOfWeek) return date;
+  const shift = day + 1 > dayOfWeek ? dayOfWeek + 7 - day : dayOfWeek - day;
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate() + shift);
+}
 /**
  * Returns the total number of weekend days (Saturdays and Sundays) in a specified month and year.
  *
@@ -162,12 +168,24 @@ function formatDate(date) {
 function getCountWeekendsInMonth(month, year) {
   const firstDay = new Date(year, month - 1, 1);
   const lastDay = new Date(year, month, 0);
-  const saturdays = Math.floor(
-    (lastDay.getDate() - (6 - firstDay.getDay())) / 7 + 1
-  );
-  const sundays = Math.floor(
-    (lastDay.getDate() - (6 - firstDay.getDay())) / 7 + 1
-  );
+  const nextSaturday = getClosestDayOfWeek(firstDay, 6);
+  const nextSunday = getClosestDayOfWeek(firstDay, 0);
+  const saturdays =
+    new Date(
+      nextSaturday.getFullYear(),
+      nextSaturday.getMonth(),
+      nextSaturday.getDate() + 28
+    ) > lastDay
+      ? 4
+      : 5;
+  const sundays =
+    new Date(
+      nextSunday.getFullYear(),
+      nextSunday.getMonth(),
+      nextSunday.getDate() + 28
+    ) > lastDay
+      ? 4
+      : 5;
   return saturdays + sundays;
 }
 
